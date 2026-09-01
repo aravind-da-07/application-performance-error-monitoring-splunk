@@ -1,0 +1,408 @@
+<form version="1.1" theme="light">
+  <label>Application Performance &amp; Error Monitoring</label>
+  <description>Application performance, error, and request monitoring dashboard</description>
+
+  <fieldset submitButton="false">
+    <input type="time" token="field1">
+      <label>Time Range</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+
+  <!-- ==================== EXECUTIVE OVERVIEW ==================== -->
+
+  <row>
+    <panel>
+      <title>Executive Overview</title>
+      <single>
+        <title>APP - Total Requests</title>
+        <search ref="APP - Total Requeststs">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Executive Overview</title>
+      <single>
+        <title>APP - Successful Requests</title>
+        <search ref="APP - Successful Requests">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Executive Overview</title>
+      <single>
+        <title>APP - Error Requests</title>
+        <search ref="APP - Error Requests">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Executive Overview</title>
+      <single>
+        <title>APP - Average Response Time</title>
+        <search ref="APP - Average Response Time">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+
+  <!-- ==================== TRAFFIC & REQUEST ANALYSIS ==================== -->
+
+  <row>
+    <panel>
+      <title>Traffic &amp; Request Analysis</title>
+      <chart>
+        <title>APP - Requests Over Time</title>
+        <search ref="APP - Requests Over Time">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Traffic &amp; Request Analysis</title>
+      <chart>
+        <title>APP - Status Distribution</title>
+        <search ref="APP - Status Distribution">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Traffic &amp; Request Analysis</title>
+      <chart>
+        <title>APP - Requests by Endpoint</title>
+        <search ref="APP - Requests by Endpoint">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Traffic &amp; Request Analysis</title>
+      <chart>
+        <title>Requests by Server</title>
+        <search>
+          <query>
+            index=splunk_project
+            | stats count as requests by extracted_host
+            | sort - requests
+          </query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <table>
+        <title>Slowest Requests</title>
+        <search>
+          <query>
+            index=splunk_project
+            | sort - response_time_ms
+            | head 10
+            | table _time user endpoint status response_time_ms
+          </query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+
+  <!-- ==================== ERROR RATE ==================== -->
+
+  <row>
+    <panel>
+      <title>Executive Overview</title>
+      <single>
+        <title>APP - Error Rate</title>
+        <search>
+          <query>
+            index=splunk_project
+            | stats count as total_requests
+              count(eval(status&gt;=400)) as error_requests
+            | eval error_rate=round((error_requests/total_requests)*100,2)
+            | table error_rate
+          </query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+
+  <!-- ==================== PERFORMANCE ANALYSIS ==================== -->
+
+  <row>
+    <panel>
+      <title>Performance Analysis</title>
+      <chart>
+        <title>Response Time by Endpoint</title>
+        <search>
+          <query>
+            index=splunk_project
+            | stats avg(response_time_ms) as avg_response_time by endpoint
+            | sort - avg_response_time
+          </query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ==================== HTTP METHOD ==================== -->
+
+  <row>
+    <panel>
+      <title>Traffic &amp; Request Analysis</title>
+      <chart>
+        <title>Requests by HTTP Method</title>
+        <search ref="APP - Requests by Method">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ==================== ENVIRONMENT ==================== -->
+
+  <row>
+    <panel>
+      <title>Traffic &amp; Request Analysis</title>
+      <chart>
+        <title>Requests by Environment</title>
+        <search ref="APP - Requests by Environment">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ==================== DATA TRANSFER ==================== -->
+
+  <row>
+    <panel>
+      <title>Performance Analysis</title>
+      <chart>
+        <title>Data Transfer by Endpoint</title>
+        <search ref="APP - Data Transfer by Endpoint">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ==================== CLIENT ANALYSIS ==================== -->
+
+  <row>
+    <panel>
+      <title>Client Analysis</title>
+      <chart>
+        <title>Top Clients by Request Volume</title>
+        <search ref="APP - Top Clients">
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ==================== SLOWEST REQUESTS ==================== -->
+
+  <row>
+    <panel>
+      <title>Performance Analysis</title>
+      <table>
+        <title>Slowest Requests</title>
+        <search>
+          <query>
+            index=splunk_project
+            | sort - response_time_ms
+            | head 10
+            | table _time user endpoint response_time_ms status extracted_host
+          </query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+
+  <!-- ==================== RESPONSE TIME BY ENDPOINT TABLE ==================== -->
+
+  <row>
+    <panel>
+      <title>Performance Analysis</title>
+      <table>
+        <title>Response Time by Endpoint</title>
+        <search>
+          <query>
+            index=splunk_project
+            | stats avg(response_time_ms) as avg_response_time by endpoint
+            | eval avg_response_time=round(avg_response_time,2)
+            | sort - avg_response_time
+            | table endpoint avg_response_time
+          </query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+
+  <!-- ==================== ERROR ANALYSIS ==================== -->
+
+  <row>
+    <panel>
+      <title>Error Analysis</title>
+      <chart>
+        <title>Top Error Messages</title>
+        <search>
+          <query>
+            index=splunk_project status&gt;=400
+            | stats count as errors by error_message
+            | sort - errors
+          </query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Error Analysis</title>
+      <chart>
+        <title>Errors by Endpoint</title>
+        <search>
+          <query>
+            index=splunk_project
+            | stats count(eval(status&gt;=400)) as errors by endpoint
+            | sort - errors
+          </query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ==================== ERROR DETAILS ==================== -->
+
+  <row>
+    <panel>
+      <title>Error Analysis</title>
+      <table>
+        <title>Error Details</title>
+        <search>
+          <query>
+            index=splunk_project
+            | where status&gt;=400
+            | sort - response_time_ms
+            | head 20
+            | table _time user endpoint response_time_ms status extracted_host
+          </query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+
+  <!-- ==================== ERRORS BY SERVER ==================== -->
+
+  <row>
+    <panel>
+      <title>Error Analysis</title>
+      <chart>
+        <title>Errors by Server</title>
+        <search>
+          <query>
+            index=splunk_project
+            | stats count(eval(status&gt;=400)) as errors by extracted_host
+            | sort - errors
+          </query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+</form>
