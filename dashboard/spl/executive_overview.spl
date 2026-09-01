@@ -1,0 +1,47 @@
+# ============================================================
+# EXECUTIVE OVERVIEW
+# Application Performance & Error Monitoring
+# Index: splunk_project
+# ============================================================
+
+
+# ------------------------------------------------------------
+# 1. TOTAL REQUESTS
+# ------------------------------------------------------------
+index=splunk_project
+| stats count as total_requests
+
+
+# ------------------------------------------------------------
+# 2. SUCCESSFUL REQUESTS
+# HTTP status codes below 400 are treated as successful
+# ------------------------------------------------------------
+index=splunk_project
+| stats count(eval(status<400)) as successful_requests
+
+
+# ------------------------------------------------------------
+# 3. ERROR REQUESTS
+# HTTP status codes 400 and above are treated as errors
+# ------------------------------------------------------------
+index=splunk_project
+| stats count(eval(status>=400)) as error_requests
+
+
+# ------------------------------------------------------------
+# 4. ERROR RATE
+# ------------------------------------------------------------
+index=splunk_project
+| stats count as total_requests
+        count(eval(status>=400)) as error_requests
+| eval error_rate=round((error_requests/total_requests)*100,2)
+| table error_rate
+
+
+# ------------------------------------------------------------
+# 5. AVERAGE RESPONSE TIME
+# ------------------------------------------------------------
+index=splunk_project
+| stats avg(response_time_ms) as avg_response_time
+| eval avg_response_time=round(avg_response_time,2)
+| table avg_response_time
