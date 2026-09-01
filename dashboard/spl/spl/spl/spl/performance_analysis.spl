@@ -1,0 +1,42 @@
+# ============================================================
+# PERFORMANCE ANALYSIS
+# Application Performance & Error Monitoring
+# Index: splunk_project
+# ============================================================
+
+
+# ------------------------------------------------------------
+# 1. AVERAGE RESPONSE TIME
+# ------------------------------------------------------------
+index=splunk_project
+| stats avg(response_time_ms) as avg_response_time
+| eval avg_response_time=round(avg_response_time,2)
+| table avg_response_time
+
+
+# ------------------------------------------------------------
+# 2. RESPONSE TIME BY ENDPOINT
+# ------------------------------------------------------------
+index=splunk_project
+| stats avg(response_time_ms) as avg_response_time by endpoint
+| eval avg_response_time=round(avg_response_time,2)
+| sort - avg_response_time
+
+
+# ------------------------------------------------------------
+# 3. SLOWEST REQUESTS
+# ------------------------------------------------------------
+index=splunk_project
+| sort - response_time_ms
+| head 10
+| table _time user endpoint response_time_ms status extracted_host
+
+
+# ------------------------------------------------------------
+# 4. DATA TRANSFER BY ENDPOINT
+# ------------------------------------------------------------
+index=splunk_project
+| stats sum(bytes) as total_bytes by endpoint
+| eval total_mb=round(total_bytes/1024/1024,2)
+| sort - total_bytes
+| table endpoint total_bytes total_mb
