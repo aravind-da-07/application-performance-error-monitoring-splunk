@@ -21,6 +21,11 @@ The project demonstrates how log data can be transformed into actionable monitor
 \---
 
 
+## 📸 Dashboard Preview
+
+![Application Performance & Error Monitoring Dashboard](screenshots/splunk-dashboard.png)
+
+
 
 \## 🎯 Business Objective
 
@@ -121,4 +126,5 @@ Application / Log Data
 &#x20;       ▼
 
 &#x20;Monitoring \& Data-Driven Insights
+
 
