@@ -1,0 +1,50 @@
+# ============================================================
+# ERROR ANALYSIS
+# Application Performance & Error Monitoring
+# Index: splunk_project
+# ============================================================
+
+
+# ------------------------------------------------------------
+# 1. TOP ERROR MESSAGES
+# ------------------------------------------------------------
+index=splunk_project status>=400
+| stats count as errors by error_message
+| sort - errors
+
+
+# ------------------------------------------------------------
+# 2. ERRORS BY ENDPOINT
+# ------------------------------------------------------------
+index=splunk_project status>=400
+| stats count as errors by endpoint
+| sort - errors
+
+
+# ------------------------------------------------------------
+# 3. ERROR DETAILS
+# ------------------------------------------------------------
+index=splunk_project status>=400
+| sort - response_time_ms
+| head 20
+| table _time user endpoint response_time_ms status extracted_host
+
+
+# ------------------------------------------------------------
+# 4. ERRORS BY SERVER
+# ------------------------------------------------------------
+index=splunk_project status>=400
+| stats count as errors by extracted_host
+| sort - errors
+
+
+# ------------------------------------------------------------
+# 5. ERROR RATE BY ENDPOINT
+# ------------------------------------------------------------
+index=splunk_project
+| stats count as total_requests
+        count(eval(status>=400)) as error_requests
+        by endpoint
+| eval error_rate=round((error_requests/total_requests)*100,2)
+| sort - error_rate
+| table endpoint total_requests error_requests error_rate
